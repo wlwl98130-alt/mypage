@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>🌸 나의 하루</title>
+<link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@300;400;700&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --pink: #FFB5C8;
+    --peach: #FFDDD2;
+    --lavender: #D4C5F9;
+    --mint: #C5F0E4;
+    --yellow: #FFF3B0;
+    --cream: #FFF9F5;
+    --brown: #6B4C3B;
+    --soft-brown: #A07060;
+    --white: #FFFFFF;
+    --shadow: rgba(180, 120, 100, 0.15);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: var(--cream);
+    min-height: 100vh;
+    padding-bottom: 80px;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  /* 배경 꾸미기 */
+  body::before {
+    content: '';
+    position: fixed;
+    top: -100px; right: -100px;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, #FFD6E0 0%, transparent 70%);
+    z-index: 0; pointer-events: none;
+  }
+  body::after {
+    content: '';
+    position: fixed;
+    bottom: -80px; left: -80px;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, #D4C5F9 0%, transparent 70%);
+    z-index: 0; pointer-events: none;
+  }
+
+  .container {
+    max-width: 430px;
+    margin: 0 auto;
+    padding: 0 16px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* 헤더 */
+  .header {
+    padding: 28px 0 16px;
+    text-align: center;
+  }
+  .header-emoji { font-size: 32px; margin-bottom: 4px; display: block; animation: float 3s ease-in-out infinite; }
+  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+  .header h1 {
+    font-family: 'Gaegu', cursive;
+    font-size: 28px;
+    color: var(--brown);
+    font-weight: 700;
+  }
+  .date-text {
+    font-size: 13px;
+    color: var(--soft-brown);
+    margin-top: 4px;
+    opacity: 0.8;
+  }
+
+  /* 탭 */
+  .tabs {
+    display: flex;
+    gap: 8px;
+    margin: 16px 0;
+    background: white;
+    padding: 6px;
+    border-radius: 20px;
+    box-shadow: 0 2px 12px var(--shadow);
+  }
+  .tab-btn {
+    flex: 1;
+    padding: 10px 4px;
+    border: none;
+    background: transparent;
+    border-radius: 14px;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 13px;
+    color: var(--soft-brown);
+    cursor: pointer;
+    transition: all 0.25s ease;
+    font-weight: 500;
+  }
+  .tab-btn.active {
+    background: var(--pink);
+    color: var(--brown);
+    box-shadow: 0 2px 8px rgba(255,181,200,0.5);
+    font-weight: 700;
+  }
+  .tab-btn span { display: block; font-size: 18px; margin-bottom: 2px; }
+
+  /* 섹션 */
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* 카드 */
+  .card {
+    background: white;
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 3px 16px var(--shadow);
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+  }
+  .card.pink::before { background: linear-gradient(90deg, var(--pink), var(--peach)); }
+  .card.lavender::before { background: linear-gradient(90deg, var(--lavender), #B8A9F5); }
+  .card.mint::before { background: linear-gradient(90deg, var(--mint), #A8E6CF); }
+  .card.yellow::before { background: linear-gradient(90deg, var(--yellow), #FFE69A); }
+
+  .card-title {
+    font-family: 'Gaegu', cursive;
+    font-size: 20px;
+    color: var(--brown);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* 투두 아이템 */
+  .todo-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px dashed #F5E6E0;
+    animation: fadeIn 0.3s ease;
+  }
+  .todo-item:last-of-type { border-bottom: none; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(-8px)} to{opacity:1;transform:translateY(0)} }
+
+  .todo-check {
+    width: 24px; height: 24px;
+    border: 2px solid var(--pink);
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+    background: white;
+  }
+  .todo-check.done { background: var(--pink); border-color: var(--pink); }
+  .todo-check.done::after { content: '✓'; color: white; font-size: 13px; font-weight: bold; }
+
+  .todo-text {
+    flex: 1;
+    font-size: 14px;
+    color: var(--brown);
+    transition: all 0.2s;
+  }
+  .todo-text.done { text-decoration: line-through; opacity: 0.45; }
+
+  .todo-delete {
+    background: none; border: none; cursor: pointer;
+    font-size: 16px; opacity: 0.3; transition: opacity 0.2s;
+    padding: 4px;
+  }
+  .todo-delete:hover { opacity: 0.7; }
+
+  /* 입력창 */
+  .add-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 14px;
+  }
+  .add-input {
+    flex: 1;
+    padding: 10px 14px;
+    border: 2px solid #F5E6E0;
+    border-radius: 14px;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 14px;
+    color: var(--brown);
+    outline: none;
+    background: var(--cream);
+    transition: border-color 0.2s;
+  }
+  .add-input:focus { border-color: var(--pink); }
+  .add-input::placeholder { color: #D0B8B0; }
+  .add-btn {
+    width: 42px; height: 42px;
+    background: var(--pink);
+    border: none; border-radius: 14px;
+    font-size: 22px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: transform 0.15s, box-shadow 0.15s;
+    box-shadow: 0 3px 8px rgba(255,181,200,0.5);
+  }
+  .add-btn:active { transform: scale(0.92); }
+
+  /* 진행률 바 */
+  .progress-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .progress-bar-bg {
+    flex: 1;
+    height: 8px;
+    background: #F5E6E0;
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--pink), #FF8FAB);
+    border-radius: 99px;
+    transition: width 0.4s ease;
+  }
+  .progress-text { font-size: 12px; color: var(--soft-brown); min-width: 36px; text-align: right; }
+
+  /* 습관 트래커 */
+  .habit-item {
+    padding: 12px 0;
+    border-bottom: 1px dashed #EDE0F5;
+    animation: fadeIn 0.3s ease;
+  }
+  .habit-item:last-of-type { border-bottom: none; }
+  .habit-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  .habit-emoji { font-size: 20px; }
+  .habit-name { font-size: 14px; color: var(--brown); flex: 1; font-weight: 500; }
+  .habit-streak {
+    font-size: 12px;
+    color: var(--soft-brown);
+    background: var(--peach);
+    padding: 2px 8px;
+    border-radius: 99px;
+  }
+  .habit-dots {
+    display: flex;
+    gap: 5px;
+  }
+  .habit-dot {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    border: 2px solid #EDE0F5;
+    background: white;
+    cursor: pointer;
+    font-size: 10px;
+    display: flex; align-items: center; justify-content: center;
+    color: #C0A8B8;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+  .habit-dot.checked {
+    background: var(--lavender);
+    border-color: var(--lavender);
+    color: #7B5EA7;
+    font-size: 14px;
+  }
+
+  /* 프로젝트 */
+  .project-card {
+    background: var(--cream);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 12px;
+    border: 2px solid #F5E6E0;
+    animation: fadeIn 0.3s ease;
+    cursor: pointer;
+    transition: transform 0.15s;
+  }
+  .project-card:active { transform: scale(0.98); }
+  .project-top {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .project-emoji-btn {
+    font-size: 26px;
+    background: none; border: none; cursor: pointer;
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    background: white;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 6px var(--shadow);
+    flex-shrink: 0;
+  }
+  .project-info { flex: 1; }
+  .project-name {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--brown);
+    margin-bottom: 4px;
+  }
+  .project-desc {
+    font-size: 12px;
+    color: var(--soft-brown);
+    opacity: 0.8;
+    line-height: 1.4;
+  }
+  .project-status {
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 99px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .status-doing { background: #FFE0F0; color: #C0607A; }
+  .status-done  { background: var(--mint); color: #3A9070; }
+  .status-hold  { background: var(--yellow); color: #8A7020; }
+
+  .project-progress-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .project-progress-bg {
+    flex: 1; height: 6px;
+    background: white;
+    border-radius: 99px; overflow: hidden;
+    border: 1px solid #F0E0D8;
+  }
+  .project-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--lavender), #B09FE8);
+    border-radius: 99px;
+    transition: width 0.4s;
+  }
+  .project-pct { font-size: 11px; color: var(--soft-brown); }
+
+  /* 새 프로젝트 */
+  .new-project-form {
+    background: white;
+    border-radius: 16px;
+    padding: 16px;
+    border: 2px dashed var(--pink);
+    margin-bottom: 12px;
+  }
+  .form-row { margin-bottom: 10px; }
+  .form-label { font-size: 12px; color: var(--soft-brown); margin-bottom: 4px; }
+  .form-input {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1.5px solid #F0E0D8;
+    border-radius: 10px;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 13px;
+    color: var(--brown);
+    background: var(--cream);
+    outline: none;
+  }
+  .form-input:focus { border-color: var(--lavender); }
+  .form-select {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1.5px solid #F0E0D8;
+    border-radius: 10px;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 13px;
+    color: var(--brown);
+    background: var(--cream);
+    outline: none;
+    appearance: none;
+  }
+  .form-range { width: 100%; accent-color: var(--lavender); margin-top: 4px; }
+  .form-btns { display: flex; gap: 8px; margin-top: 12px; }
+  .btn-cancel {
+    flex: 1; padding: 10px;
+    border: 1.5px solid #F0E0D8;
+    border-radius: 12px;
+    background: white;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 13px;
+    color: var(--soft-brown);
+    cursor: pointer;
+  }
+  .btn-save {
+    flex: 2; padding: 10px;
+    border: none;
+    border-radius: 12px;
+    background: var(--lavender);
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 13px;
+    color: #5A3D8A;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  /* 빈 상태 */
+  .empty-state {
+    text-align: center;
+    padding: 32px 16px;
+    color: var(--soft-brown);
+    opacity: 0.6;
+  }
+  .empty-state .empty-emoji { font-size: 40px; margin-bottom: 8px; display: block; }
+  .empty-state p { font-size: 13px; line-height: 1.6; }
+
+  /* 하단 플로팅 버튼 */
+  .fab {
+    position: fixed;
+    bottom: 24px; right: 24px;
+    width: 56px; height: 56px;
+    background: linear-gradient(135deg, var(--pink), #FF8FAB);
+    border: none; border-radius: 50%;
+    font-size: 26px;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(255,100,150,0.4);
+    z-index: 100;
+    transition: transform 0.15s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .fab:active { transform: scale(0.9); }
+
+  /* 토스트 */
+  .toast {
+    position: fixed;
+    bottom: 96px; left: 50%; transform: translateX(-50%);
+    background: var(--brown);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 13px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+    z-index: 200;
+    white-space: nowrap;
+  }
+  .toast.show { opacity: 1; }
+
+  /* 습관 추가 모달 */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(107, 76, 59, 0.25);
+    z-index: 150;
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal {
+    background: white;
+    border-radius: 28px 28px 0 0;
+    padding: 24px 20px 40px;
+    width: 100%; max-width: 430px;
+    animation: slideUp 0.3s ease;
+  }
+  @keyframes slideUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
+  .modal-title {
+    font-family: 'Gaegu', cursive;
+    font-size: 22px;
+    color: var(--brown);
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  .emoji-picker {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    margin-bottom: 12px;
+  }
+  .emoji-opt {
+    width: 40px; height: 40px;
+    border: 2px solid #F5E6E0;
+    border-radius: 10px;
+    background: white;
+    font-size: 20px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+  }
+  .emoji-opt.selected { border-color: var(--lavender); background: #F0ECFF; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <span class="header-emoji">🌸</span>
+    <h1>나의 하루</h1>
+    <div class="date-text" id="dateText"></div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('todo')">
+      <span>✅</span>할 일
+    </button>
+    <button class="tab-btn" onclick="switchTab('habit')">
+      <span>🌱</span>습관
+    </button>
+    <button class="tab-btn" onclick="switchTab('project')">
+      <span>✨</span>프로젝트
+    </button>
+  </div>
+
+  <!-- 할 일 -->
+  <div class="section active" id="tab-todo">
+    <div class="card pink">
+      <div class="progress-row">
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="todoProgressFill" style="width:0%"></div>
+        </div>
+        <div class="progress-text" id="todoProgressText">0%</div>
+      </div>
+      <div class="card-title">🌷 오늘의 할 일</div>
+      <div id="todoList"></div>
+      <div class="add-row">
+        <input class="add-input" id="todoInput" placeholder="할 일 추가하기..." onkeydown="if(event.key==='Enter')addTodo()">
+        <button class="add-btn" onclick="addTodo()">＋</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 습관 -->
+  <div class="section" id="tab-habit">
+    <div class="card lavender">
+      <div class="card-title">🌿 나의 습관</div>
+      <div id="habitList"></div>
+      <div style="margin-top:14px; text-align:center;">
+        <button style="background:var(--lavender);border:none;padding:10px 20px;border-radius:14px;font-family:'Noto Sans KR',sans-serif;font-size:13px;color:#5A3D8A;font-weight:600;cursor:pointer;" onclick="openHabitModal()">+ 습관 추가하기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 프로젝트 -->
+  <div class="section" id="tab-project">
+    <div class="card mint">
+      <div class="card-title">💫 프로젝트</div>
+      <div id="projectNewForm" style="display:none">
+        <div class="new-project-form">
+          <div class="form-row">
+            <div class="form-label">프로젝트 이름</div>
+            <input class="form-input" id="pjName" placeholder="예: 포트폴리오 완성하기">
+          </div>
+          <div class="form-row">
+            <div class="form-label">한 줄 설명</div>
+            <input class="form-input" id="pjDesc" placeholder="어떤 작업인가요?">
+          </div>
+          <div class="form-row">
+            <div class="form-label">상태</div>
+            <select class="form-select" id="pjStatus">
+              <option value="doing">진행중 🔥</option>
+              <option value="hold">보류중 ⏸️</option>
+              <option value="done">완료 ✅</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <div class="form-label">진행률 <span id="pjPctLabel">0%</span></div>
+            <input type="range" class="form-range" id="pjPct" min="0" max="100" value="0" oninput="document.getElementById('pjPctLabel').textContent=this.value+'%'">
+          </div>
+          <div class="form-btns">
+            <button class="btn-cancel" onclick="cancelProject()">취소</button>
+            <button class="btn-save" onclick="saveProject()">저장하기 💾</button>
+          </div>
+        </div>
+      </div>
+      <div id="projectList"></div>
+      <div id="projectEmpty" class="empty-state">
+        <span class="empty-emoji">🌱</span>
+        <p>아직 프로젝트가 없어요<br>새 프로젝트를 추가해볼까요?</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<button class="fab" id="fabBtn" onclick="handleFab()">＋</button>
+<div class="toast" id="toast"></div>
+
+<!-- 습관 추가 모달 -->
+<div class="modal-overlay" id="habitModal" onclick="closeHabitModal(event)">
+  <div class="modal">
+    <div class="modal-title">🌱 새 습관 만들기</div>
+    <div class="form-row">
+      <div class="form-label">이모지 선택</div>
+      <div class="emoji-picker" id="emojiPicker"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-label">습관 이름</div>
+      <input class="form-input" id="habitInput" placeholder="예: 물 2L 마시기">
+    </div>
+    <div style="margin-top:16px;">
+      <button class="btn-save" style="width:100%;" onclick="saveHabit()">추가하기 ✨</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// 날짜
+const days = ['일','월','화','수','목','금','토'];
+const now = new Date();
+document.getElementById('dateText').textContent =
+  `${now.getFullYear()}년 ${now.getMonth()+1}월 ${now.getDate()}일 (${days[now.getDay()]})`;
+
+// 데이터
+let todos = JSON.parse(localStorage.getItem('todos')||'[]');
+let habits = JSON.parse(localStorage.getItem('habits')||'[]');
+let projects = JSON.parse(localStorage.getItem('projects')||'[]');
+let currentTab = 'todo';
+let selectedEmoji = '🌸';
+
+// 탭 전환
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>{
+    b.classList.toggle('active', ['todo','habit','project'][i]===tab);
+  });
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  currentTab = tab;
+  if(tab==='project') document.getElementById('fabBtn').textContent='＋';
+}
+
+// 토스트
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2000);
+}
+
+// FAB
+function handleFab() {
+  if(currentTab==='todo') { document.getElementById('todoInput').focus(); }
+  else if(currentTab==='habit') { openHabitModal(); }
+  else if(currentTab==='project') { showProjectForm(); }
+}
+
+// ── 할 일 ──
+function renderTodos() {
+  const list = document.getElementById('todoList');
+  if(todos.length===0) {
+    list.innerHTML = '<div class="empty-state"><span class="empty-emoji">🌷</span><p>할 일을 추가해봐요!</p></div>';
+  } else {
+    list.innerHTML = todos.map((t,i)=>`
+      <div class="todo-item">
+        <div class="todo-check ${t.done?'done':''}" onclick="toggleTodo(${i})"></div>
+        <span class="todo-text ${t.done?'done':''}">${t.text}</span>
+        <button class="todo-delete" onclick="deleteTodo(${i})">🗑</button>
+      </div>
+    `).join('');
+  }
+  const done = todos.filter(t=>t.done).length;
+  const pct = todos.length ? Math.round(done/todos.length*100) : 0;
+  document.getElementById('todoProgressFill').style.width = pct+'%';
+  document.getElementById('todoProgressText').textContent = pct+'%';
+  save();
+}
+function addTodo() {
+  const inp = document.getElementById('todoInput');
+  const text = inp.value.trim();
+  if(!text) return;
+  todos.push({text, done:false});
+  inp.value = '';
+  renderTodos();
+  showToast('할 일을 추가했어요 ✅');
+}
+function toggleTodo(i) {
+  todos[i].done = !todos[i].done;
+  renderTodos();
+  if(todos[i].done) showToast('완료! 수고했어요 🎉');
+}
+function deleteTodo(i) {
+  todos.splice(i,1);
+  renderTodos();
+}
+
+// ── 습관 ──
+const EMOJIS = ['🌸','🌿','💧','📚','🏃','🎨','🧘','☀️','🍎','✏️','💪','🎵'];
+let selectedEmojiEl = null;
+
+function openHabitModal() {
+  const picker = document.getElementById('emojiPicker');
+  picker.innerHTML = EMOJIS.map(e=>`<button class="emoji-opt ${e===selectedEmoji?'selected':''}" onclick="selectEmoji('${e}',this)">${e}</button>`).join('');
+  document.getElementById('habitModal').classList.add('show');
+  document.getElementById('habitInput').value = '';
+}
+function closeHabitModal(e) {
+  if(e.target.id==='habitModal') document.getElementById('habitModal').classList.remove('show');
+}
+function selectEmoji(e, el) {
+  selectedEmoji = e;
+  document.querySelectorAll('.emoji-opt').forEach(b=>b.classList.remove('selected'));
+  el.classList.add('selected');
+}
+function saveHabit() {
+  const name = document.getElementById('habitInput').value.trim();
+  if(!name) return;
+  const today = new Date();
+  const weekDays = Array(7).fill(false);
+  habits.push({name, emoji:selectedEmoji, days:weekDays, streak:0});
+  document.getElementById('habitModal').classList.remove('show');
+  renderHabits();
+  showToast('새 습관을 추가했어요 🌱');
+}
+function renderHabits() {
+  const list = document.getElementById('habitList');
+  const dayLabels = ['월','화','수','목','금','토','일'];
+  if(habits.length===0) {
+    list.innerHTML = '<div class="empty-state"><span class="empty-emoji">🌱</span><p>좋은 습관을 만들어봐요!</p></div>';
+  } else {
+    list.innerHTML = habits.map((h,hi)=>`
+      <div class="habit-item">
+        <div class="habit-header">
+          <span class="habit-emoji">${h.emoji}</span>
+          <span class="habit-name">${h.name}</span>
+          <span class="habit-streak">🔥 ${h.streak}일</span>
+          <button style="background:none;border:none;cursor:pointer;opacity:0.3;font-size:14px;" onclick="deleteHabit(${hi})">✕</button>
+        </div>
+        <div class="habit-dots">
+          ${h.days.map((d,di)=>`<div class="habit-dot ${d?'checked':''}" onclick="toggleHabit(${hi},${di})" title="${dayLabels[di]}">${d?'✓':dayLabels[di]}</div>`).join('')}
+        </div>
+      </div>
+    `).join('');
+  }
+  save();
+}
+function toggleHabit(hi,di) {
+  habits[hi].days[di] = !habits[hi].days[di];
+  habits[hi].streak = habits[hi].days.filter(Boolean).length;
+  renderHabits();
+}
+function deleteHabit(i) { habits.splice(i,1); renderHabits(); }
+
+// ── 프로젝트 ──
+function showProjectForm() {
+  document.getElementById('projectNewForm').style.display='block';
+  document.getElementById('pjName').focus();
+}
+function cancelProject() {
+  document.getElementById('projectNewForm').style.display='none';
+}
+function saveProject() {
+  const name = document.getElementById('pjName').value.trim();
+  const desc = document.getElementById('pjDesc').value.trim();
+  const status = document.getElementById('pjStatus').value;
+  const pct = parseInt(document.getElementById('pjPct').value);
+  if(!name) return;
+  const emojis = {'todo':'📌','doing':'🔥','hold':'⏸️','done':'✅'};
+  projects.push({name, desc, status, pct, emoji: emojis[status]||'📌'});
+  document.getElementById('projectNewForm').style.display='none';
+  document.getElementById('pjName').value='';
+  document.getElementById('pjDesc').value='';
+  document.getElementById('pjPct').value=0;
+  document.getElementById('pjPctLabel').textContent='0%';
+  renderProjects();
+  showToast('프로젝트를 추가했어요 ✨');
+}
+function renderProjects() {
+  const list = document.getElementById('projectList');
+  const empty = document.getElementById('projectEmpty');
+  const statusLabel = {doing:'진행중 🔥', done:'완료 ✅', hold:'보류중 ⏸️'};
+  const statusClass = {doing:'status-doing', done:'status-done', hold:'status-hold'};
+  if(projects.length===0) {
+    list.innerHTML=''; empty.style.display='block';
+  } else {
+    empty.style.display='none';
+    list.innerHTML = projects.map((p,i)=>`
+      <div class="project-card">
+        <div class="project-top">
+          <div class="project-emoji-btn">${p.emoji}</div>
+          <div class="project-info">
+            <div class="project-name">${p.name}</div>
+            ${p.desc?`<div class="project-desc">${p.desc}</div>`:''}
+          </div>
+          <div>
+            <span class="project-status ${statusClass[p.status]}">${statusLabel[p.status]}</span>
+          </div>
+        </div>
+        <div class="project-progress-row">
+          <div class="project-progress-bg">
+            <div class="project-progress-fill" style="width:${p.pct}%"></div>
+          </div>
+          <div class="project-pct">${p.pct}%</div>
+          <button style="background:none;border:none;cursor:pointer;opacity:0.3;font-size:13px;margin-left:6px;" onclick="deleteProject(${i})">✕</button>
+        </div>
+      </div>
+    `).join('');
+  }
+  save();
+}
+function deleteProject(i) { projects.splice(i,1); renderProjects(); }
+
+// 저장
+function save() {
+  localStorage.setItem('todos', JSON.stringify(todos));
+  localStorage.setItem('habits', JSON.stringify(habits));
+  localStorage.setItem('projects', JSON.stringify(projects));
+}
+
+// 초기 렌더
+renderTodos();
+renderHabits();
+renderProjects();
+</script>
+</body>
+</html>
